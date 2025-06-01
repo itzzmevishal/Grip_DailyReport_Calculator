@@ -3,179 +3,398 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GRIP BRM DAILY REPORT</title>
+  <title>Daily Report Calculator</title>
   <style>
-    /* Base styles */
+    /* General Body & Typography */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 1.5rem;
-      background: #fafafa;
-      color: #222;
+      background: linear-gradient(to right, #ece9e6, #ffffff); /* Subtle gradient background */
+      color: #333;
+      line-height: 1.6;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 1rem;
-      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      color: #2c3e50; /* Darker heading color */
+      word-break: break-word;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
     }
 
-    /* Container for responsive scrolling */
+    /* Table Wrapper & Styling */
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* More prominent shadow */
+      border-radius: 12px; /* Softer rounded corners */
       background: white;
-      padding: 0.5rem;
+      padding: 0.8rem; /* Slightly more padding */
+      margin-bottom: 1.5rem;
     }
 
     table {
       border-collapse: collapse;
       width: 100%;
-      min-width: 700px; /* Keep a min width so small devices scroll */
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      table-layout: fixed; /* Crucial for consistent column widths */
     }
 
     th, td {
-      border: 1px solid #aaa;
-      padding: 0.7rem 0.5rem;
+      border: 1px solid #c7d0d8; /* Softer border color */
+      padding: 0.6rem 0.4rem; /* Reduced padding for narrower columns */
       text-align: center;
       vertical-align: middle;
-      white-space: nowrap;
+      white-space: nowrap; /* Keep content on one line initially */
     }
 
     th {
-      background-color: #f0f0f0;
-      font-weight: 600;
+      background-color: #eef4f9; /* Light blueish background */
+      font-weight: 700; /* Bolder headers */
+      color: #3a4750; /* Darker text for headers */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      text-transform: uppercase; /* Uppercase column names */
     }
+
+    /* Specific column widths for better control */
+    th:nth-child(1), td:nth-child(1) { width: 5%; } /* Sl. No. */
+    th:nth-child(2), td:nth-child(2) { width: 30%; white-space: normal; text-align: left; } /* Names - allow wrap, left align */
+    th:nth-child(3), td:nth-child(3) { width: 8%; } /* Type */
+    th:nth-child(4), td:nth-child(4),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7) { width: 14.25%; } /* A, B, C, Totals - distributed equally */
 
     td.type-column {
-      width: 9rem;
-      font-weight: 600;
-      background-color: #f9f9f9;
+      white-space: normal; /* Allow this column to wrap if needed */
+      background-color: #f8fbfd; /* Slightly different background for type column */
     }
 
-    /* Inputs styling */
-    input[type="number"], input[readonly] {
-      width: 6.5rem;
-      padding: 0.3rem 0.4rem;
-      font-size: 1rem;
+    /* Input Fields (General & Responsive) */
+    input[type="number"], input[readonly], input[type="date"] {
+      width: 100%; /* Make inputs fluid within their cells */
+      max-width: 65px; /* Standardized Max Width for ALL numeric/readonly inputs */
+      padding: 0.4rem 0.5rem;
+      font-size: 0.95rem;
       text-align: center;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #c2d1e0; /* Softer border */
+      border-radius: 6px;
       box-sizing: border-box;
-      background-color: #fff;
-      transition: border-color 0.2s ease-in-out;
+      background-color: #fdfdfd;
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      -moz-appearance: textfield; /* Firefox spinner hide */
+      display: inline-block; /* Ensure it respects width/height */
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     input[readonly] {
-      background-color: #eee;
-      color: #555;
+      background-color: #e9eff4; /* Lighter background for readonly */
+      color: #667788;
       cursor: not-allowed;
     }
 
-    input[type="number"]:focus:not([readonly]) {
+    input[type="number"]:focus:not([readonly]),
+    input[type="date"]:focus {
       border-color: #007bff;
       outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
       background-color: #fff;
     }
-
-    /* Wagon and strap inputs grouped in columns */
+    
+    /* Specific Input Groups (Wagon & Strap) */
     .wagon-inputs, .strap-inputs {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.2rem;
+      flex-direction: column; /* Stacks labels and inputs by default */
+      align-items: center; /* Center items within the flex container */
+      gap: 0.3rem; /* Slightly reduced gap */
+      padding: 0.2rem;
     }
 
+    /* Desktop/Tablet: Make nested labels and inputs side-by-side */
     .wagon-inputs label,
     .strap-inputs label {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      font-size: 0.85rem;
-      gap: 0.3rem;
+      display: flex; /* Use flexbox for horizontal alignment */
+      flex-direction: row; /* Align label and input in a row */
+      justify-content: space-between; /* Space out label and input */
+      align-items: center; /* Vertically align items */
+      width: 100%; /* Take full width of the parent div */
+      font-size: 0.8rem; /* Smaller font for nested labels */
+      gap: 0.2rem; /* Gap between label text and input */
+      text-align: right; /* Align label text to the right for better flow */
+      color: #555;
+      white-space: nowrap; /* Keep label text on one line */
+    }
+    
+    .wagon-inputs label input,
+    .strap-inputs label input {
+      flex-shrink: 0; /* Prevent input from shrinking */
+      width: 100%; /* Allow input to take available space */
+      max-width: 45px; /* Adjust max-width for side-by-side inputs */
+      font-size: 0.85rem; /* Slightly smaller font for these specific inputs */
+      padding: 0.25rem 0.2rem; /* Reduced padding */
+      margin-left: 0.2rem; /* Small margin from label */
+    }
+    
+    .strap-inputs label span:first-child { /* For "Wagon Strap:" etc. */
+        flex-grow: 1; /* Allow the text span to grow */
+        text-align: right;
+    }
+    .strap-inputs label span:last-child { /* For "x" */
+        flex-shrink: 0;
+        margin: 0 0.2rem;
     }
 
-    .wagon-inputs input[type="number"],
-    .strap-inputs input[type="number"] {
-      width: 4.3rem;
-      padding: 0.25rem;
-      font-size: 0.9rem;
-    }
 
-    /* Clear button styling */
-    .clear-btn {
-      margin: 1.5rem auto 0 auto;
-      display: block;
-      padding: 0.7rem 2rem;
-      font-size: 1.1rem;
-      background-color: #ff5252;
-      color: white;
+    /* Buttons */
+    .clear-btn, .save-btn, .load-btn, .delete-btn, .pdf-btn, #generateRangePdfBtn {
+      flex-shrink: 0;
+      margin: 0.4rem;
+      padding: 0.8rem 1.6rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px; /* Slightly more rounded buttons */
       cursor: pointer;
-      transition: background-color 0.3s ease;
       user-select: none;
+      transition: all 0.3s ease; /* Smooth transitions for hover effects */
+      color: white;
+      white-space: nowrap;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle button shadow */
+    }
+    .clear-btn { background-color: #dc3545; }
+    .clear-btn:hover { background-color: #c82333; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .save-btn { background-color: #28a745; }
+    .save-btn:hover { background-color: #218838; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .load-btn { background-color: #007bff; }
+    .load-btn:hover { background-color: #0069d9; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .delete-btn { background-color: #ffc107; color: #333; } /* Warning yellow */
+    .delete-btn:hover { background-color: #e0a800; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .pdf-btn, #generateRangePdfBtn { background-color: #6c757d; }
+    .pdf-btn:hover, #generateRangePdfBtn:hover { background-color: #5a6268; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+
+    /* Date Pickers & Controls Layout */
+    label {
+      font-weight: 600;
+      margin-right: 0.5rem;
+      white-space: nowrap;
+      color: #444;
     }
 
-    .clear-btn:hover {
-      background-color: #e64545;
+    #datePicker, #fromDate, #toDate {
+      max-width: 160px; /* Slightly larger for date pickers */
+      padding: 0.5rem 0.7rem;
+      font-size: 1rem;
     }
 
-    /* Responsive tweaks */
-    @media (max-width: 900px) {
+    .controls, .pdf-date-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      gap: 0.8rem;
+      align-items: center;
+      padding: 1rem;
+      background-color: #f8fbfd; /* Light background for control sections */
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Softer shadow */
+    }
+    .pdf-date-controls {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e6ee; /* Divider line */
+    }
+
+    /* ========================================= */
+    /* Media Queries for Responsiveness */
+    /* ========================================= */
+
+    /* Small screens (e.g., phones) */
+    @media (max-width: 768px) {
+      body {
+        margin: 0.5rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .table-wrapper {
+        padding: 0.4rem;
+        border-radius: 8px;
+      }
+
       table {
+        font-size: 0.8rem;
+        min-width: 600px; /* Ensures horizontal scrolling if needed */
+      }
+
+      th, td {
+        padding: 0.5rem 0.3rem; /* Reduced cell padding */
+      }
+      
+      /* Re-adjust column widths for mobile to prioritize content */
+      th:nth-child(1), td:nth-child(1) { width: 5%; }
+      th:nth-child(2), td:nth-child(2) { width: 30%; } /* Names still needs space */
+      th:nth-child(3), td:nth-child(3) { width: 8%; }
+      th:nth-child(4), td:nth-child(4),
+      th:nth-child(5), td:nth-child(5),
+      th:nth-child(6), td:nth-child(6),
+      th:nth-child(7), td:nth-child(7) { width: 14.25%; }
+
+
+      input[type="number"], input[readonly], input[type="date"] {
+        max-width: 55px; /* Even smaller max-width for inputs on mobile */
+        padding: 0.3rem 0.2rem;
         font-size: 0.85rem;
       }
-      input[type="number"], input[readonly] {
-        width: 5.5rem;
-        font-size: 0.9rem;
+
+      /* Mobile: Stack wagon inputs vertically */
+      .wagon-inputs label,
+      .strap-inputs label {
+        flex-direction: column; /* Stack on mobile */
+        font-size: 0.7rem; /* Tiny font for nested labels */
+        gap: 0.1rem; /* Smaller gap */
+        white-space: normal; /* Allow labels to wrap */
+        text-align: center; /* Center align labels */
       }
-      .wagon-inputs input[type="number"],
-      .strap-inputs input[type="number"] {
-        width: 3.5rem;
-        font-size: 0.85rem;
+      .wagon-inputs label input,
+      .strap-inputs label input {
+        max-width: 100%; /* Full width on mobile */
+        font-size: 0.8rem;
+        padding: 0.25rem;
+      }
+      .strap-inputs label span:first-child {
+          text-align: center;
+          flex-grow: 0; /* Don't grow on mobile */
+      }
+      .strap-inputs label span:last-child {
+          display: none; /* Hide 'x' on mobile */
       }
     }
 
-    @media (max-width: 550px) {
+    /* Medium screens (e.g., tablets) */
+    @media (min-width: 769px) and (max-width: 1024px) {
       body {
         margin: 1rem;
       }
+
       h2 {
-        font-size: 1.4rem;
+        font-size: 1.8rem;
       }
+
       table {
-        min-width: 600px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
       }
-      input[type="number"], input[readonly] {
-        width: 5rem;
-        font-size: 0.85rem;
-        padding: 0.25rem;
+
+      th, td {
+        padding: 0.6rem 0.4rem;
       }
-      .wagon-inputs label,
-      .strap-inputs label {
-        font-size: 0.75rem;
-        gap: 0.2rem;
+      
+      input[type="number"], input[readonly], input[type="date"] {
+        max-width: 60px; /* Slightly larger than mobile, smaller than desktop */
+        font-size: 0.9rem;
       }
-      .wagon-inputs input[type="number"],
-      .strap-inputs input[type="number"] {
-        width: 3rem;
-        font-size: 0.75rem;
+
+      /* Adjust nested inputs for side-by-side on tablets */
+      .wagon-inputs label input,
+      .strap-inputs label input {
+        max-width: 42px; /* Slightly larger than mobile, smaller than desktop */
+        font-size: 0.88rem;
       }
-      .clear-btn {
-        padding: 0.6rem 1.5rem;
-        font-size: 1rem;
+
+      .clear-btn, .save-btn, .load-btn, .delete-btn, .pdf-btn, #generateRangePdfBtn {
+        font-size: 0.95rem;
+        padding: 0.7rem 1.2rem;
+      }
+
+      .controls, .pdf-date-controls {
+        gap: 0.7rem;
       }
     }
+
+    /* Print Styles (to make PDF look cleaner if printed directly from browser) */
+    @media print {
+      body {
+        background: white;
+        margin: 0;
+        padding: 0;
+      }
+      .controls, .pdf-date-controls, .clear-btn, .save-btn, .load-btn, .delete-btn, .pdf-btn, #generateRangePdfBtn {
+        display: none !important;
+      }
+      .table-wrapper {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+      }
+      table, th, td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        background-color: #fff !important;
+        font-size: 0.75rem; /* Ensure print font size is readable */
+        padding: 0.4rem 0.2rem !important; /* Adjust print padding */
+      }
+      th {
+        background-color: #f2f2f2 !important;
+      }
+      /* Ensure values are shown and not inputs */
+      input[type="number"], input[readonly], input[type="date"] {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        border: none !important;
+        background: none !important;
+        padding: 0 !important;
+        width: auto !important;
+        text-align: center !important;
+        font-size: 0.9rem !important;
+        display: inline-block;
+        content: attr(value); /* This is a trick to show input value in print */
+      }
+      /* For complex inputs, rely on the PDF generation logic for better output */
+      .wagon-inputs label, .strap-inputs label {
+          display: block; /* Stack on print for clarity */
+          font-size: 0.75rem; /* Smaller font on print */
+          margin-bottom: 0.1rem;
+      }
+      .wagon-inputs input, .strap-inputs input {
+          display: none; /* Hide actual inputs on print */
+      }
+    }
+
   </style>
 </head>
 <body>
 
 <h2>GRIP STRAPPING TECHNOLOGY PVT. LTD DAILY REPORT CALCULATOR</h2>
+
+<div class="controls" role="region" aria-label="Save and load daily reports">
+  <label for="datePicker">Select Date:</label>
+  <input type="date" id="datePicker" aria-describedby="dateHelp" />
+  <button class="save-btn" id="saveBtn" aria-label="Save current table data">Save</button>
+  <button class="load-btn" id="loadBtn" aria-label="Load saved data for selected date">Load</button>
+  <button class="delete-btn" id="deleteBtn" aria-label="Delete saved data for selected date">Delete</button>
+  <button class="clear-btn" id="clearBtn" aria-label="Clear all input fields">Clear All Inputs</button>
+</div>
+
+<div class="pdf-date-controls" role="region" aria-label="PDF report date range selection">
+    <label for="fromDate">From Date:</label>
+    <input type="date" id="fromDate" />
+    <label for="toDate">To Date:</label>
+    <input type="date" id="toDate" />
+    <button class="pdf-btn" id="generateRangePdfBtn" aria-label="Generate PDF for selected date range">Generate Range PDF</button>
+</div>
+
 
 <div class="table-wrapper">
   <table id="dataTable" aria-label="Daily production and strap consumption report">
@@ -191,15 +410,25 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Rows dynamically generated -->
-    </tbody>
+      </tbody>
   </table>
 </div>
 
-<button class="clear-btn" aria-label="Clear all input fields" onclick="clearAll()">Clear All Inputs</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
   const tableBody = document.querySelector("#dataTable tbody");
+  const datePicker = document.getElementById("datePicker");
+  const saveBtn = document.getElementById("saveBtn");
+  const loadBtn = document.getElementById("loadBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  
+  // New PDF date range elements
+  const fromDatePicker = document.getElementById("fromDate");
+  const toDatePicker = document.getElementById("toDate");
+  const generateRangePdfBtn = document.getElementById("generateRangePdfBtn");
 
   const typeValues = {
     1: "Online", 2: "Mtr", 3: "Nos.", 4: "Mtr",
@@ -219,92 +448,158 @@
     10: "Total"
   };
 
-  // Create the table rows with inputs
-  for (let i = 1; i <= 10; i++) {
-    const row = document.createElement("tr");
-
-    row.innerHTML += `<td>${i}</td>`;
-    row.innerHTML += `<td>${nameValues[i]}</td>`;
-    row.innerHTML += `<td class="type-column"><span>${typeValues[i] || ""}</span></td>`;
-
-    ['A', 'B', 'C'].forEach(col => {
-      const td = document.createElement("td");
-
-      if (i === 5) {
-        // Wagon inputs grouped vertically
-        const wagonDiv = document.createElement("div");
-        wagonDiv.className = "wagon-inputs";
-        ["BRN/BRNA", "LOCAL", "BFN"].forEach(type => {
-          const label = document.createElement("label");
-          label.innerHTML = `
-            ${type}: <input type="number" min="0" value="" data-${col}-wagon="${type}" class="${col}wagonQty row${i}" aria-label="${type} quantity for column ${col}">
-          `;
-          wagonDiv.appendChild(label);
-        });
-        wagonDiv.addEventListener("input", () => {
-          calculateWagon();
-          calculateAllTotals();
-        });
-        td.appendChild(wagonDiv);
-      }
-
-      else if (i === 8) {
-        // Strap inputs grouped vertically with qty × multiplier
-        const strapDiv = document.createElement("div");
-        strapDiv.className = "strap-inputs";
-        ["Wagon Strap", "Bundle Strap"].forEach(type => {
-          const label = document.createElement("label");
-          label.innerHTML = `
-            ${type} Qty: <input type="number" min="0" value="" class="${col}strapQty row${i}" data-type="${type}" aria-label="${type} quantity for column ${col}">
-            × <input type="number" min="0" value="" class="${col}strapMult row${i}" data-type="${type}" aria-label="${type} multiplier for column ${col}">
-          `;
-          strapDiv.appendChild(label);
-        });
-        strapDiv.addEventListener("input", () => {
-          calculateStrap();
-          calculateAllTotals();
-        });
-        td.appendChild(strapDiv);
-      }
-
-      else {
-        // Normal numeric input
-        const input = document.createElement("input");
-        input.type = "number";
-        input.placeholder = col;
-        input.dataset.col = col;
-        input.dataset.row = i;
-        if ([2, 4, 6, 7, 9, 10].includes(i)) {
-          input.readOnly = true;
-          input.style.backgroundColor = "#eee";
-        }
-        input.addEventListener("input", () => {
-          applyFormulas();
-          calculateAllTotals();
-        });
-        td.appendChild(input);
-      }
-
-      row.appendChild(td);
-    });
-
-    // Total column readonly input
-    const totalInput = document.createElement("input");
-    totalInput.type = "number";
-    totalInput.readOnly = true;
-    totalInput.style.backgroundColor = "#eee";
-    totalInput.className = "totalCell";
-    totalInput.dataset.row = i;
-    totalInput.setAttribute('aria-label', `Total for row ${i}`);
-
-    const tdTotal = document.createElement("td");
-    tdTotal.appendChild(totalInput);
-    row.appendChild(tdTotal);
-
-    tableBody.appendChild(row);
+  // Helper function to format numbers
+  function formatNumber(num) {
+    if (Number.isInteger(num)) {
+      return num.toString();
+    }
+    return num.toFixed(3);
   }
 
-  // Formula application functions
+  // A helper function to create a table HTML string from data for PDF
+  function createTableHtmlFromData(data, date) {
+      let html = `
+          <h3 style="text-align: center; margin-bottom: 10px; font-size: 1.2rem; page-break-after: avoid;">Daily Report for: ${date}</h3>
+          <table style="width:100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8rem; border: 1px solid #aaa;">
+              <thead>
+                  <tr style="background-color: #f0f0f0;">
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">Sl. No.</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">Names</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">Type</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">A</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">B</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">C</th>
+                      <th style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">Totals</th>
+                  </tr>
+              </thead>
+              <tbody>
+      `;
+
+      for (let i = 1; i <= 10; i++) {
+          html += `<tr style="page-break-inside: avoid;">
+                      <td style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">${i}</td>
+                      <td style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: left;">${nameValues[i]}</td>
+                      <td style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">${typeValues[i] || ""}</td>`;
+
+          ['A', 'B', 'C'].forEach(col => {
+              html += `<td style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">`;
+              if (i === 5) {
+                  // Wagon inputs
+                  const brnValue = data[`row${i}_${col}_wagon_BRN/BRNA`] || '-';
+                  const localValue = data[`row${i}_${col}_wagon_LOCAL`] || '-';
+                  const bfnValue = data[`row${i}_${col}_wagon_BFN`] || '-';
+                  html += `<span style="display:block; text-align:right; white-space: nowrap;">BRN/BRNA: ${brnValue}</span><span style="display:block; text-align:right; white-space: nowrap;">LOCAL: ${localValue}</span><span style="display:block; text-align:right; white-space: nowrap;">BFN: ${bfnValue}</span>`;
+              } else if (i === 8) {
+                  // Strap inputs
+                  const wagonQty = data[`row${i}_${col}_strap_Wagon Strap_qty`] || '-';
+                  const wagonMult = data[`row${i}_${col}_strap_Wagon Strap_mult`] || '-';
+                  const bundleQty = data[`row${i}_${col}_strap_Bundle Strap_qty`] || '-';
+                  const bundleMult = data[`row${i}_${col}_strap_Bundle Strap_mult`] || '-';
+                  html += `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.1rem;">
+                        <span style="display:flex; justify-content:space-between; align-items:center; width:100%; white-space: nowrap;">
+                            <span style="flex-grow:1; text-align:right;">Wagon Strap:</span> <span>${wagonQty}</span><span style="margin:0 2px;">x</span><span>${wagonMult}</span>
+                        </span>
+                        <span style="display:flex; justify-content:space-between; align-items:center; width:100%; white-space: nowrap;">
+                            <span style="flex-grow:1; text-align:right;">Bundle Strap:</span> <span>${bundleQty}</span><span style="margin:0 2px;">x</span><span>${bundleMult}</span>
+                        </span>
+                    </div>
+                  `;
+              } else {
+                  // Standard inputs and calculated fields
+                  html += data[`row${i}_${col}`] || '-';
+              }
+              html += `</td>`;
+          });
+          // Totals column
+          html += `<td style="border: 1px solid #aaa; padding: 0.7rem 0.5rem; text-align: center;">${data[`row${i}_Totals`] || '-'}</td>`;
+          html += `</tr>`;
+      }
+      html += `</tbody></table>`;
+      return html;
+  }
+
+
+  // Initialize table with rows and inputs
+  function initTable() {
+    for (let i = 1; i <= 10; i++) {
+      const row = document.createElement("tr");
+
+      row.innerHTML += `<td>${i}</td>`;
+      row.innerHTML += `<td style="text-align: left;">${nameValues[i]}</td>`; /* Align name column left */
+      row.innerHTML += `<td class="type-column"><span>${typeValues[i] || ""}</span></td>`;
+
+      ['A', 'B', 'C'].forEach(col => {
+        const td = document.createElement("td");
+
+        if (i === 5) {
+          const wagonDiv = document.createElement("div");
+          wagonDiv.className = "wagon-inputs";
+          ["BRN/BRNA", "LOCAL", "BFN"].forEach(type => {
+            const label = document.createElement("label");
+            label.innerHTML = `
+              ${type}: <input type="number" min="0" value="" data-col="${col}" data-row="${i}" data-wagon-type="${type}" class="wagonQty" aria-label="${type} quantity for column ${col}">
+            `;
+            wagonDiv.appendChild(label);
+          });
+          wagonDiv.addEventListener("input", () => {
+            applyFormulas();
+          });
+          td.appendChild(wagonDiv);
+        }
+
+        else if (i === 8) {
+          const strapDiv = document.createElement("div");
+          strapDiv.className = "strap-inputs";
+          ["Wagon Strap", "Bundle Strap"].forEach(type => {
+            const label = document.createElement("label");
+            label.innerHTML = `
+              <span>${type}:</span> <input type="number" min="0" value="" data-col="${col}" data-row="${i}" data-strap-type="${type}" data-input-type="qty" class="strapQty" aria-label="${type} quantity for column ${col}">
+              <span>×</span> <input type="number" min="0" value="" class="strapMult" data-col="${col}" data-row="${i}" data-strap-type="${type}" data-input-type="mult" aria-label="${type} multiplier for column ${col}">
+            `;
+            strapDiv.appendChild(label);
+          });
+          strapDiv.addEventListener("input", () => {
+            applyFormulas();
+          });
+          td.appendChild(strapDiv);
+        }
+
+        else {
+          const input = document.createElement("input");
+          input.type = "number";
+          input.placeholder = col;
+          input.dataset.col = col;
+          input.dataset.row = i;
+          if ([2, 4, 6, 7, 9, 10].includes(i)) {
+            input.readOnly = true;
+            input.style.backgroundColor = "#eee";
+          }
+          input.addEventListener("input", () => {
+            applyFormulas();
+          });
+          td.appendChild(input);
+        }
+        row.appendChild(td);
+      });
+
+      const totalInput = document.createElement("input");
+      totalInput.type = "number";
+      totalInput.readOnly = true;
+      totalInput.style.backgroundColor = "#eee";
+      totalInput.className = "totalCell";
+      totalInput.dataset.row = i;
+      totalInput.dataset.col = "Totals"; // Add a data-col for Totals column
+      totalInput.setAttribute('aria-label', `Total for row ${i}`);
+
+      const tdTotal = document.createElement("td");
+      tdTotal.appendChild(totalInput);
+      row.appendChild(tdTotal);
+
+      tableBody.appendChild(row);
+    }
+  }
+
   function applyFormulas() {
     ['A', 'B', 'C'].forEach(col => {
       const getVal = (row) =>
@@ -313,81 +608,326 @@
       const row1 = getVal(1);
       const row3 = getVal(3);
 
+      // Row 2 calculation (same for all columns)
       const row2Field = document.querySelector(`input[data-row="2"][data-col="${col}"]`);
+      if (row2Field) {
+        row2Field.value = formatNumber(row1 * 1.236 * 7);
+      }
+
+      // Row 4 calculation (same for all columns)
       const row4Field = document.querySelector(`input[data-row="4"][data-col="${col}"]`);
+      if (row4Field) {
+        row4Field.value = formatNumber(row3 * 1.236);
+      }
 
-      if (row2Field) row2Field.value = (1.236 * 7 * row1).toFixed(3);
-      if (row4Field) row4Field.value = (1.236 * row3).toFixed(3);
+      // Get wagon input values for row 5
+      const wagonBRN = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="BRN/BRNA"]`);
+      const wagonLOCAL = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="LOCAL"]`);
+      const wagonBFN = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="BFN"]`);
+      
+      const brnValue = wagonBRN ? parseFloat(wagonBRN.value) || 0 : 0;
+      const localValue = wagonLOCAL ? parseFloat(wagonLOCAL.value) || 0 : 0;
+      const bfnValue = wagonBFN ? parseFloat(wagonBFN.value) || 0 : 0; 
+
+      // Row 6 calculation (same formula for all columns)
+      const row6Field = document.querySelector(`input[data-row="6"][data-col="${col}"]`);
+      if (row6Field) {
+        row6Field.value = formatNumber((brnValue * 9) + (bfnValue * 9) + (localValue * 3));
+      }
+
+      // Row 7 calculation (same formula for all columns)
+      const row7Field = document.querySelector(`input[data-row="7"][data-col="${col}"]`);
+      if (row7Field) {
+        row7Field.value = formatNumber((brnValue * 9 * 7.25) + (bfnValue * 9 * 7.55) + (localValue * 3 * 7.25));
+      }
+
+      // Row 9 calculation (sum of wagon strap and bundle strap for the column)
+      const row9Field = document.querySelector(`input[data-row="9"][data-col="${col}"]`);
+      if (row9Field) {
+        const strapWagonQtyInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Wagon Strap"][data-input-type="qty"]`);
+        const strapWagonMultInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Wagon Strap"][data-input-type="mult"]`);
+        const strapBundleQtyInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Bundle Strap"][data-input-type="qty"]`);
+        const strapBundleMultInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Bundle Strap"][data-input-type="mult"]`);
+
+        const strapWagonQty = strapWagonQtyInput ? (parseFloat(strapWagonQtyInput.value) || 0) : 0;
+        const strapWagonMult = strapWagonMultInput ? (parseFloat(strapWagonMultInput.value) || 0) : 0;
+        const strapBundleQty = strapBundleQtyInput ? (parseFloat(strapBundleQtyInput.value) || 0) : 0;
+        const strapBundleMult = strapBundleMultInput ? (parseFloat(strapBundleMultInput.value) || 0) : 0;
+
+        row9Field.value = formatNumber((strapWagonQty * strapWagonMult) + (strapBundleQty * strapBundleMult));
+      }
+
+      // Row 10 calculation (sum of column's rows 2,4,7,9)
+      const row10Field = document.querySelector(`input[data-row="10"][data-col="${col}"]`);
+      if (row10Field) {
+        const row2Value = row2Field ? (parseFloat(row2Field.value) || 0) : 0;
+        const row4Value = row4Field ? (parseFloat(row4Field.value) || 0) : 0;
+        const row7Value = row7Field ? (parseFloat(row7Field.value) || 0) : 0;
+        const row9Value = row9Field ? (parseFloat(row9Field.value) || 0) : 0;
+        
+        row10Field.value = formatNumber(row2Value + row4Value + row7Value + row9Value);
+      }
     });
 
-    calculateWagon();
-    calculateStrap();
-    calculateAllTotals();
+    // Calculate Totals column (sum of A+B+C for each row)
+    for (let rowNum = 1; rowNum <= 10; rowNum++) {
+      let sum = 0;
+
+      if (rowNum === 5) {
+        // Sum of all wagon qty inputs across A, B, C
+        ['A','B','C'].forEach(col => {
+          const wagonBRN = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="BRN/BRNA"]`);
+          const wagonLOCAL = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="LOCAL"]`);
+          const wagonBFN = document.querySelector(`input[data-row="5"][data-col="${col}"][data-wagon-type="BFN"]`);
+          
+          sum += (parseFloat(wagonBRN?.value) || 0) + (parseFloat(wagonLOCAL?.value) || 0) + (parseFloat(wagonBFN?.value) || 0);
+        });
+      }
+      else if (rowNum === 8) {
+        // Sum of (qty*multiplier) for wagon and bundle straps across A, B, C
+        ['A','B','C'].forEach(col => {
+          const strapWagonQtyInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Wagon Strap"][data-input-type="qty"]`);
+          const strapWagonMultInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Wagon Strap"][data-input-type="mult"]`);
+          const strapBundleQtyInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Bundle Strap"][data-input-type="qty"]`);
+          const strapBundleMultInput = document.querySelector(`input[data-row="8"][data-col="${col}"][data-strap-type="Bundle Strap"][data-input-type="mult"]`);
+
+          const strapWagonQty = strapWagonQtyInput ? (parseFloat(strapWagonQtyInput.value) || 0) : 0;
+          const strapWagonMult = strapWagonMultInput ? (parseFloat(strapWagonMultInput.value) || 0) : 0;
+          const strapBundleQty = strapBundleQtyInput ? (parseFloat(strapBundleQtyInput.value) || 0) : 0;
+          const strapBundleMult = strapBundleMultInput ? (parseFloat(strapBundleMultInput.value) || 0) : 0;
+
+          sum += (strapWagonQty * strapWagonMult) + (strapBundleQty * strapBundleMult);
+        });
+      }
+      else {
+        // Sum of A+B+C for that row for standard inputs
+        ['A', 'B', 'C'].forEach(col => {
+          const input = document.querySelector(`input[data-row="${rowNum}"][data-col="${col}"]`);
+          if(input) {
+            sum += parseFloat(input.value) || 0;
+          }
+        });
+      }
+
+      // Set total cell value
+      const totalCell = document.querySelector(`input.totalCell[data-row="${rowNum}"]`);
+      if(totalCell) totalCell.value = formatNumber(sum);
+    }
   }
 
-  function calculateWagon() {
-    ['A', 'B', 'C'].forEach(col => {
-      let total6 = 0, total7 = 0;
-      document.querySelectorAll(`.${col}wagonQty.row5`).forEach(input => {
-        const type = input.getAttribute(`data-${col}-wagon`);
-        const qty = parseFloat(input.value) || 0;
-        if (type === "BRN/BRNA") {
-          total6 += qty * 9;
-          total7 += qty * 9 * 7.25;
-        } else if (type === "BFN") {
-          total6 += qty * 9;
-          total7 += qty * 9 * 7.55;
-        } else if (type === "LOCAL") {
-          total6 += qty * 3;
-          total7 += qty * 3 * 7.25;
-        }
-      });
-
-      document.querySelector(`input[data-row="6"][data-col="${col}"]`).value = total6.toFixed(2);
-      document.querySelector(`input[data-row="7"][data-col="${col}"]`).value = total7.toFixed(2);
-    });
-  }
-
-  function calculateStrap() {
-    ['A', 'B', 'C'].forEach(col => {
-      let total = 0;
-      const qtys = document.querySelectorAll(`.${col}strapQty.row8`);
-      qtys.forEach(qtyInput => {
-        const type = qtyInput.dataset.type;
-        const qty = parseFloat(qtyInput.value) || 0;
-        const multInput = document.querySelector(`.${col}strapMult.row8[data-type="${type}"]`);
-        const mult = parseFloat(multInput?.value) || 0;
-        total += qty * mult;
-      });
-      document.querySelector(`input[data-row="9"][data-col="${col}"]`).value = total.toFixed(2);
-    });
-  }
-
-  function calculateAllTotals() {
-    for (let i = 1; i <= 10; i++) {
-      const A = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="A"]`)?.value) || 0;
-      const B = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="B"]`)?.value) || 0;
-      const C = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="C"]`)?.value) || 0;
-      const total = A + B + C;
-      document.querySelector(`.totalCell[data-row="${i}"]`).value = total.toFixed(2);
+  // Save data for selected date
+  function saveData() {
+    const date = datePicker.value;
+    if (!date) {
+      alert("Please select a date before saving.");
+      return;
     }
 
-    // Final row (row 10) column-wise total from rows 2,4,7,9
-    ['A', 'B', 'C'].forEach(col => {
-      const rowsToSum = [2, 4, 7, 9];
-      let sum = 0;
-      rowsToSum.forEach(row => {
-        sum += parseFloat(document.querySelector(`input[data-row="${row}"][data-col="${col}"]`)?.value) || 0;
-      });
-      document.querySelector(`input[data-row="10"][data-col="${col}"]`).value = sum.toFixed(2);
+    const data = {};
+    tableBody.querySelectorAll("input").forEach(input => {
+      const row = input.dataset.row;
+      const col = input.dataset.col; 
+      let key;
+
+      if (input.dataset.wagonType) { 
+        const wagonType = input.dataset.wagonType;
+        key = `row${row}_${col}_wagon_${wagonType}`;
+      } else if (input.dataset.strapType && input.dataset.inputType) { 
+        const strapType = input.dataset.strapType;
+        const inputType = input.dataset.inputType;
+        key = `row${row}_${col}_strap_${strapType}_${inputType}`;
+      } else {
+        key = `row${row}_${col}`;
+      }
+      data[key] = input.value;
     });
+
+    localStorage.setItem("tableData-" + date, JSON.stringify(data));
+    alert("Data saved successfully for " + date);
   }
 
-  function clearAll() {
-    document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
+  // Load data for selected date
+  function loadData() {
+    const date = datePicker.value;
+    if (!date) {
+      alert("Please select a date before loading.");
+      return;
+    }
+    const savedData = localStorage.getItem("tableData-" + date);
+    if (!savedData) {
+      alert("No saved data found for this date.");
+      return;
+    }
+    const data = JSON.parse(savedData);
+
+    clearInputs(false); 
+
+    tableBody.querySelectorAll("input").forEach(input => {
+      const row = input.dataset.row;
+      const col = input.dataset.col;
+      let key;
+
+      if (input.dataset.wagonType) { 
+        const wagonType = input.dataset.wagonType;
+        key = `row${row}_${col}_wagon_${wagonType}`;
+      } else if (input.dataset.strapType && input.dataset.inputType) { 
+        const strapType = input.dataset.strapType;
+        const inputType = input.dataset.inputType;
+        key = `row${row}_${col}_strap_${strapType}_${inputType}`;
+      } else {
+        key = `row${row}_${col}`;
+      }
+
+      if (data[key] !== undefined) {
+        input.value = data[key];
+      }
+    });
+
     applyFormulas();
-    calculateAllTotals();
   }
+
+  // Delete saved data for selected date
+  function deleteData() {
+    const date = datePicker.value;
+    if (!date) {
+      alert("Please select a date before deleting.");
+      return;
+    }
+    if(confirm(`Are you sure you want to delete saved data for ${date}?`)) {
+      localStorage.removeItem("tableData-" + date);
+      alert("Data deleted for " + date);
+      clearInputs(true); 
+    }
+  }
+
+  // Clear inputs (optionally apply formulas)
+  function clearInputs(applyAfter = true) {
+    tableBody.querySelectorAll("input").forEach(input => {
+      if (!input.readOnly || input.classList.contains("totalCell")) { 
+        input.value = "";
+      }
+      if (input.dataset.wagonType || (input.dataset.strapType && input.dataset.inputType)) {
+          input.value = "";
+      }
+    });
+    if (applyAfter) applyFormulas();
+  }
+
+  // NEW: Function to generate PDF for a date range
+  async function generateRangePdf() {
+    const fromDateStr = fromDatePicker.value;
+    const toDateStr = toDatePicker.value;
+
+    if (!fromDateStr || !toDateStr) {
+      alert("Please select both 'From Date' and 'To Date' for PDF generation.");
+      return;
+    }
+
+    const fromDate = new Date(fromDateStr + 'T00:00:00'); 
+    const toDate = new Date(toDateStr + 'T00:00:00'); 
+
+    if (fromDate > toDate) {
+      alert("'From Date' cannot be after 'To Date'.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4'); 
+    const imgWidth = 200; 
+    const marginX = 5; 
+    let currentY = 10; 
+
+    // Add a main title for the entire report
+    pdf.setFontSize(16);
+    pdf.text("GRIP STRAPPING TECHNOLOGY PVT. LTD DAILY REPORT", pdf.internal.pageSize.width / 2, currentY, { align: 'center' });
+    currentY += 10;
+    pdf.setFontSize(12);
+    pdf.text(`Report Period: ${fromDateStr} to ${toDateStr}`, pdf.internal.pageSize.width / 2, currentY, { align: 'center' });
+    currentY += 15; 
+
+    // Iterate through each date in the range
+    let currentDate = new Date(fromDate);
+    
+    while (currentDate.toISOString().slice(0, 10) <= toDate.toISOString().slice(0, 10)) {
+      const dateKey = currentDate.toISOString().slice(0, 10); 
+      const savedData = localStorage.getItem("tableData-" + dateKey);
+
+      const tempDiv = document.createElement('div');
+      tempDiv.style.width = '100%'; 
+      tempDiv.style.padding = '5px'; 
+      tempDiv.style.boxSizing = 'border-box'; 
+
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        tempDiv.innerHTML = createTableHtmlFromData(data, dateKey);
+      } else {
+        tempDiv.innerHTML = `
+            <h3 style="text-align: center; margin-bottom: 10px; font-size: 1.2rem; color: #888;">Daily Report for: ${dateKey} (No Data Saved)</h3>
+            <p style="text-align: center; color: #888; font-size: 0.9rem;">No data was found for this date.</p>
+            <div style="margin-bottom: 20px;"></div>
+        `;
+      }
+      
+      document.body.appendChild(tempDiv); 
+
+      try {
+          const canvas = await html2canvas(tempDiv, { 
+              scale: 2, 
+              logging: false,
+              useCORS: true
+          });
+          const imgData = canvas.toDataURL('image/png');
+          const imgHeight = (canvas.height * imgWidth) / canvas.width; 
+
+          const pageHeight = pdf.internal.pageSize.height;
+          
+          if (currentY + imgHeight + 10 > pageHeight - 10 && currentY > 10) { 
+              pdf.addPage();
+              currentY = 10; 
+          }
+
+          pdf.addImage(imgData, 'PNG', marginX, currentY, imgWidth, imgHeight);
+          currentY += imgHeight + 15; 
+
+      } catch (error) {
+          console.error(`Error generating PDF for ${dateKey}:`, error);
+          if (currentY + 20 > pageHeight - 10) {
+              pdf.addPage();
+              currentY = 10;
+          }
+          pdf.setFontSize(10);
+          pdf.setTextColor(255, 0, 0); 
+          pdf.text(`Error generating report for ${dateKey}`, marginX, currentY);
+          pdf.setTextColor(0, 0, 0); 
+          currentY += 10; 
+      } finally {
+          tempDiv.remove(); 
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1); 
+    }
+
+    pdf.save(`Daily_Report_${fromDateStr}_to_${toDateStr}.pdf`);
+    alert("Combined PDF saved successfully!");
+  }
+
+  // Initialize
+  initTable();
+  applyFormulas();
+
+  // Set default date pickers to today
+  const today = new Date();
+  datePicker.valueAsDate = today;
+  fromDatePicker.valueAsDate = today;
+  toDatePicker.valueAsDate = today;
+
+
+  // Event listeners
+  saveBtn.addEventListener("click", saveData);
+  loadBtn.addEventListener("click", loadData);
+  deleteBtn.addEventListener("click", deleteData);
+  clearBtn.addEventListener("click", () => clearInputs(true));
+  generateRangePdfBtn.addEventListener("click", generateRangePdf); 
 </script>
 
 </body>
