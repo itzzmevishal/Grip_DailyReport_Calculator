@@ -2,101 +2,208 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Updated Table UI with Clear Button</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynamic Table with Formulas - Responsive</title>
   <style>
+    /* Base styles */
     body {
       font-family: Arial, sans-serif;
-      margin: 30px;
+      margin: 1.5rem;
+      background: #fafafa;
+      color: #222;
     }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+
+    /* Container for responsive scrolling */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      background: white;
+      padding: 0.5rem;
+    }
+
     table {
       border-collapse: collapse;
-      width: 95%;
-      margin: auto;
+      width: 100%;
+      min-width: 700px; /* Keep a min width so small devices scroll */
+      font-size: 0.9rem;
     }
+
     th, td {
       border: 1px solid #aaa;
-      padding: 10px;
+      padding: 0.7rem 0.5rem;
       text-align: center;
       vertical-align: middle;
+      white-space: nowrap;
     }
+
     th {
       background-color: #f0f0f0;
+      font-weight: 600;
     }
+
     td.type-column {
-      width: 200px;
-      font-weight: bold;
+      width: 9rem;
+      font-weight: 600;
       background-color: #f9f9f9;
     }
+
+    /* Inputs styling */
     input[type="number"], input[readonly] {
-      width: 90%;
-      padding: 4px;
+      width: 6.5rem;
+      padding: 0.3rem 0.4rem;
+      font-size: 1rem;
       text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: #fff;
+      transition: border-color 0.2s ease-in-out;
     }
+
+    input[readonly] {
+      background-color: #eee;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    input[type="number"]:focus:not([readonly]) {
+      border-color: #007bff;
+      outline: none;
+      background-color: #fff;
+    }
+
+    /* Wagon and strap inputs grouped in columns */
     .wagon-inputs, .strap-inputs {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      gap: 0.2rem;
     }
-    .wagon-inputs label, .strap-inputs label {
-      margin-bottom: 4px;
+
+    .wagon-inputs label,
+    .strap-inputs label {
       display: flex;
       justify-content: space-between;
       width: 100%;
+      font-size: 0.85rem;
+      gap: 0.3rem;
     }
-    .wagon-inputs input[type="number"], .strap-inputs input[type="number"] {
-      width: 60px;
-      margin-left: 5px;
+
+    .wagon-inputs input[type="number"],
+    .strap-inputs input[type="number"] {
+      width: 4.3rem;
+      padding: 0.25rem;
+      font-size: 0.9rem;
     }
-    #clearBtn {
-      margin: 25px auto 10px;
+
+    /* Clear button styling */
+    .clear-btn {
+      margin: 1.5rem auto 0 auto;
       display: block;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 0.7rem 2rem;
+      font-size: 1.1rem;
       background-color: #ff5252;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
     }
-    #clearBtn:hover {
+
+    .clear-btn:hover {
       background-color: #e64545;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 900px) {
+      table {
+        font-size: 0.85rem;
+      }
+      input[type="number"], input[readonly] {
+        width: 5.5rem;
+        font-size: 0.9rem;
+      }
+      .wagon-inputs input[type="number"],
+      .strap-inputs input[type="number"] {
+        width: 3.5rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 550px) {
+      body {
+        margin: 1rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+      }
+      table {
+        min-width: 600px;
+        font-size: 0.8rem;
+      }
+      input[type="number"], input[readonly] {
+        width: 5rem;
+        font-size: 0.85rem;
+        padding: 0.25rem;
+      }
+      .wagon-inputs label,
+      .strap-inputs label {
+        font-size: 0.75rem;
+        gap: 0.2rem;
+      }
+      .wagon-inputs input[type="number"],
+      .strap-inputs input[type="number"] {
+        width: 3rem;
+        font-size: 0.75rem;
+      }
+      .clear-btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<h2 style="text-align: center;">GRIP STRAPPING TECHNOLOGY PVT. LTD  DAILY REPORT CALCULATOR</h2>
+<h2>GRIP STRAPPING TECHNOLOGY PVT. LTD DAILY REPORT CALCULATOR</h2>
 
-<table id="dataTable">
-  <thead>
-    <tr>
-      <th>Sl. No.</th>
-      <th>Names</th>
-      <th>Type</th>
-      <th>A</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Rows will be dynamically inserted -->
-  </tbody>
-</table>
+<div class="table-wrapper">
+  <table id="dataTable" aria-label="Daily production and strap consumption report">
+    <thead>
+      <tr>
+        <th scope="col">Sl. No.</th>
+        <th scope="col">Names</th>
+        <th scope="col">Type</th>
+        <th scope="col">A</th>
+        <th scope="col">B</th>
+        <th scope="col">C</th>
+        <th scope="col">Totals</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows dynamically generated -->
+    </tbody>
+  </table>
+</div>
 
-<button id="clearBtn">Clear All Data</button>
+<button class="clear-btn" aria-label="Clear all input fields" onclick="clearAll()">Clear All Inputs</button>
 
 <script>
   const tableBody = document.querySelector("#dataTable tbody");
 
   const typeValues = {
-    1: "Online",
-    2: "Mtr",
-    3: "Nos.",
-    4: "Mtr",
-    5: "Online",
-    6: "Nos.",
-    7: "Mtr",
-    8: "Nos.",
-    9: "Mtr",
-    10: ""
+    1: "Online", 2: "Mtr", 3: "Nos.", 4: "Mtr",
+    5: "Online", 6: "Nos.", 7: "Mtr", 8: "Nos.", 9: "Mtr", 10: ""
   };
 
   const nameValues = {
@@ -112,167 +219,175 @@
     10: "Total"
   };
 
+  // Create the table rows with inputs
   for (let i = 1; i <= 10; i++) {
     const row = document.createElement("tr");
 
-    const slCell = document.createElement("td");
-    slCell.textContent = i;
-    row.appendChild(slCell);
+    row.innerHTML += `<td>${i}</td>`;
+    row.innerHTML += `<td>${nameValues[i]}</td>`;
+    row.innerHTML += `<td class="type-column"><span>${typeValues[i] || ""}</span></td>`;
 
-    const nameCell = document.createElement("td");
-    nameCell.textContent = nameValues[i] || "";
-    row.appendChild(nameCell);
+    ['A', 'B', 'C'].forEach(col => {
+      const td = document.createElement("td");
 
-    const typeCell = document.createElement("td");
-    typeCell.className = "type-column";
-    typeCell.innerHTML = `<span>${typeValues[i] || ""}</span>`;
-    row.appendChild(typeCell);
-
-    const aCell = document.createElement("td");
-
-    if (i === 5) {
-      const wagonDiv = document.createElement("div");
-      wagonDiv.className = "wagon-inputs";
-
-      ["BRN/BRNA", "LOCAL", "BFN"].forEach(wagon => {
-        const label = document.createElement("label");
-        label.innerHTML = `
-          ${wagon}: <input type="number" min="0" value="" data-wagon="${wagon}" class="wagonQuantity">
-        `;
-        wagonDiv.appendChild(label);
-      });
-
-      wagonDiv.addEventListener("input", () => {
-        calculateWagonTotals();
-        calculateTotal();
-      });
-
-      aCell.appendChild(wagonDiv);
-    }
-
-    else if (i === 8) {
-      const strapDiv = document.createElement("div");
-      strapDiv.className = "strap-inputs";
-
-      ["Wagon Strap", "Bundle Strap"].forEach(type => {
-        const label = document.createElement("label");
-        label.innerHTML = `
-          ${type} Qty: <input type="number" min="0" value="" class="strapQty" data-type="${type}">
-          × <input type="number" min="0" value="" class="strapMultiplier" data-type="${type}">
-        `;
-        strapDiv.appendChild(label);
-      });
-
-      strapDiv.addEventListener("input", () => {
-        calculateStrapTotal();
-        calculateTotal();
-      });
-
-      aCell.appendChild(strapDiv);
-    }
-
-    else {
-      const input = document.createElement("input");
-      input.type = "number";
-      input.placeholder = "A";
-      input.dataset.row = i;
-      input.dataset.col = "A";
-
-      if ([2, 4, 6, 7, 9, 10].includes(i)) {
-        input.readOnly = true;
-        input.style.backgroundColor = "#eee";
+      if (i === 5) {
+        // Wagon inputs grouped vertically
+        const wagonDiv = document.createElement("div");
+        wagonDiv.className = "wagon-inputs";
+        ["BRN/BRNA", "LOCAL", "BFN"].forEach(type => {
+          const label = document.createElement("label");
+          label.innerHTML = `
+            ${type}: <input type="number" min="0" value="" data-${col}-wagon="${type}" class="${col}wagonQty row${i}" aria-label="${type} quantity for column ${col}">
+          `;
+          wagonDiv.appendChild(label);
+        });
+        wagonDiv.addEventListener("input", () => {
+          calculateWagon();
+          calculateAllTotals();
+        });
+        td.appendChild(wagonDiv);
       }
 
-      if (i === 1 || i === 3) {
+      else if (i === 8) {
+        // Strap inputs grouped vertically with qty × multiplier
+        const strapDiv = document.createElement("div");
+        strapDiv.className = "strap-inputs";
+        ["Wagon Strap", "Bundle Strap"].forEach(type => {
+          const label = document.createElement("label");
+          label.innerHTML = `
+            ${type} Qty: <input type="number" min="0" value="" class="${col}strapQty row${i}" data-type="${type}" aria-label="${type} quantity for column ${col}">
+            × <input type="number" min="0" value="" class="${col}strapMult row${i}" data-type="${type}" aria-label="${type} multiplier for column ${col}">
+          `;
+          strapDiv.appendChild(label);
+        });
+        strapDiv.addEventListener("input", () => {
+          calculateStrap();
+          calculateAllTotals();
+        });
+        td.appendChild(strapDiv);
+      }
+
+      else {
+        // Normal numeric input
+        const input = document.createElement("input");
+        input.type = "number";
+        input.placeholder = col;
+        input.dataset.col = col;
+        input.dataset.row = i;
+        if ([2, 4, 6, 7, 9, 10].includes(i)) {
+          input.readOnly = true;
+          input.style.backgroundColor = "#eee";
+        }
         input.addEventListener("input", () => {
           applyFormulas();
-          calculateTotal();
+          calculateAllTotals();
         });
+        td.appendChild(input);
       }
 
-      aCell.appendChild(input);
-    }
+      row.appendChild(td);
+    });
 
-    row.appendChild(aCell);
+    // Total column readonly input
+    const totalInput = document.createElement("input");
+    totalInput.type = "number";
+    totalInput.readOnly = true;
+    totalInput.style.backgroundColor = "#eee";
+    totalInput.className = "totalCell";
+    totalInput.dataset.row = i;
+    totalInput.setAttribute('aria-label', `Total for row ${i}`);
+
+    const tdTotal = document.createElement("td");
+    tdTotal.appendChild(totalInput);
+    row.appendChild(tdTotal);
+
     tableBody.appendChild(row);
   }
 
+  // Formula application functions
   function applyFormulas() {
-    const getVal = (row, col) =>
-      parseFloat(document.querySelector(`input[data-row="${row}"][data-col="${col}"]`)?.value) || 0;
+    ['A', 'B', 'C'].forEach(col => {
+      const getVal = (row) =>
+        parseFloat(document.querySelector(`input[data-row="${row}"][data-col="${col}"]`)?.value) || 0;
 
-    const row1 = getVal(1, "A");
-    document.querySelector('input[data-row="2"][data-col="A"]').value = (1.236 * 7 * row1).toFixed(3);
+      const row1 = getVal(1);
+      const row3 = getVal(3);
 
-    const row3 = getVal(3, "A");
-    document.querySelector('input[data-row="4"][data-col="A"]').value = (1.236 * row3).toFixed(3);
+      const row2Field = document.querySelector(`input[data-row="2"][data-col="${col}"]`);
+      const row4Field = document.querySelector(`input[data-row="4"][data-col="${col}"]`);
 
-    calculateTotal();
-  }
-
-  function calculateWagonTotals() {
-    const wagonInputs = document.querySelectorAll('.wagonQuantity');
-    let totalRow6 = 0, totalRow7 = 0;
-
-    wagonInputs.forEach(input => {
-      const type = input.dataset.wagon;
-      const qty = parseFloat(input.value) || 0;
-
-      if (type === "BRN/BRNA") {
-        totalRow6 += qty * 9;
-        totalRow7 += qty * 9 * 7.25;
-      } else if (type === "BFN") {
-        totalRow6 += qty * 9;
-        totalRow7 += qty * 9 * 7.55;
-      } else if (type === "LOCAL") {
-        totalRow6 += qty * 3;
-        totalRow7 += qty * 3 * 7.25;
-      }
+      if (row2Field) row2Field.value = (1.236 * 7 * row1).toFixed(3);
+      if (row4Field) row4Field.value = (1.236 * row3).toFixed(3);
     });
 
-    document.querySelector('input[data-row="6"][data-col="A"]').value = totalRow6.toFixed(2);
-    document.querySelector('input[data-row="7"][data-col="A"]').value = totalRow7.toFixed(2);
-    calculateTotal();
+    calculateWagon();
+    calculateStrap();
+    calculateAllTotals();
   }
 
-  function calculateStrapTotal() {
-    const qtyInputs = document.querySelectorAll('.strapQty');
-    let total = 0;
+  function calculateWagon() {
+    ['A', 'B', 'C'].forEach(col => {
+      let total6 = 0, total7 = 0;
+      document.querySelectorAll(`.${col}wagonQty.row5`).forEach(input => {
+        const type = input.getAttribute(`data-${col}-wagon`);
+        const qty = parseFloat(input.value) || 0;
+        if (type === "BRN/BRNA") {
+          total6 += qty * 9;
+          total7 += qty * 9 * 7.25;
+        } else if (type === "BFN") {
+          total6 += qty * 9;
+          total7 += qty * 9 * 7.55;
+        } else if (type === "LOCAL") {
+          total6 += qty * 3;
+          total7 += qty * 3 * 7.25;
+        }
+      });
 
-    qtyInputs.forEach(qtyInput => {
-      const type = qtyInput.dataset.type;
-      const qty = parseFloat(qtyInput.value) || 0;
-      const mult = parseFloat(document.querySelector(`.strapMultiplier[data-type="${type}"]`)?.value) || 0;
-      total += qty * mult;
+      document.querySelector(`input[data-row="6"][data-col="${col}"]`).value = total6.toFixed(2);
+      document.querySelector(`input[data-row="7"][data-col="${col}"]`).value = total7.toFixed(2);
     });
-
-    document.querySelector('input[data-row="9"][data-col="A"]').value = total.toFixed(2);
-    calculateTotal();
   }
 
-  function calculateTotal() {
-    const getVal = row =>
-      parseFloat(document.querySelector(`input[data-row="${row}"][data-col="A"]`)?.value) || 0;
-
-    const total = getVal(2) + getVal(4) + getVal(7) + getVal(9);
-    document.querySelector('input[data-row="10"][data-col="A"]').value = total.toFixed(2);
-  }
-
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    const inputs = document.querySelectorAll('input[type="number"]');
-    inputs.forEach(input => {
-      if (!input.readOnly) {
-        input.value = "";
-      } else {
-        input.value = "";
-      }
+  function calculateStrap() {
+    ['A', 'B', 'C'].forEach(col => {
+      let total = 0;
+      const qtys = document.querySelectorAll(`.${col}strapQty.row8`);
+      qtys.forEach(qtyInput => {
+        const type = qtyInput.dataset.type;
+        const qty = parseFloat(qtyInput.value) || 0;
+        const multInput = document.querySelector(`.${col}strapMult.row8[data-type="${type}"]`);
+        const mult = parseFloat(multInput?.value) || 0;
+        total += qty * mult;
+      });
+      document.querySelector(`input[data-row="9"][data-col="${col}"]`).value = total.toFixed(2);
     });
+  }
 
+  function calculateAllTotals() {
+    for (let i = 1; i <= 10; i++) {
+      const A = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="A"]`)?.value) || 0;
+      const B = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="B"]`)?.value) || 0;
+      const C = parseFloat(document.querySelector(`input[data-row="${i}"][data-col="C"]`)?.value) || 0;
+      const total = A + B + C;
+      document.querySelector(`.totalCell[data-row="${i}"]`).value = total.toFixed(2);
+    }
+
+    // Final row (row 10) column-wise total from rows 2,4,7,9
+    ['A', 'B', 'C'].forEach(col => {
+      const rowsToSum = [2, 4, 7, 9];
+      let sum = 0;
+      rowsToSum.forEach(row => {
+        sum += parseFloat(document.querySelector(`input[data-row="${row}"][data-col="${col}"]`)?.value) || 0;
+      });
+      document.querySelector(`input[data-row="10"][data-col="${col}"]`).value = sum.toFixed(2);
+    });
+  }
+
+  function clearAll() {
+    document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
     applyFormulas();
-    calculateWagonTotals();
-    calculateStrapTotal();
-    calculateTotal();
-  });
+    calculateAllTotals();
+  }
 </script>
 
 </body>
